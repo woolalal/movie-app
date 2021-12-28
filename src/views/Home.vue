@@ -34,7 +34,8 @@ export default {
   props:{showSearch: Boolean},
   created(){
     var getOption = localStorage.getItem('option');
-    this.displayOption = getOption;
+    getOption === null ? this.displayOption === "Top Rated" : this.displayOption = getOption;
+    //this.displayOption = getOption;
     // this.getNowPlaying();
     this.filterDisplay();
   },
