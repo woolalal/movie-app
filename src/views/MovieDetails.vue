@@ -7,6 +7,18 @@
                 <div class="moviedetails-dates">
                     <p>{{ this.details.release_date }}</p>
                     <p>{{ runtime }}</p>
+                    <button v-if="!this.isAdded" class="addtofav-btn" @click="addToFav">
+                        <i class="far fa-heart"></i>
+                        Add to favourites
+                    </button>
+                    <button v-else class="addedtofav-btn" @click="removeFromFav">
+                        <i class="fas fa-heart non-hover">
+                            <span> Added to Favourites!</span>
+                        </i>
+                        <i class="fas fa-heart-broken only-hover">
+                            <span> Remove from Favourites!</span>
+                        </i>
+                    </button>
                 </div>
                 <h3>Overview</h3>
                 <p class="moviedetails-overview">{{this.details.overview}}</p>
@@ -60,6 +72,9 @@ export default {
             details: null,
             credits: null,
             trailer: null,
+            favMovies: [],
+            movielist: null,
+            isAdded: false
         }
     },
     methods:{
@@ -81,15 +96,38 @@ export default {
             axios.get(`https://api.themoviedb.org/3/movie/${this.id}/videos?api_key=${this.apiKey}&language=en-US&append_to_response=videos`)
             .then(res => {
                 this.trailer = res.data;
-                console.log(this.trailer);
-                console.log(this.trailer.results.length);
             })
+        },
+        getFavList: function(){
+            // get all previously added to favourites
+            this.movielist = localStorage.getItem('favmovielist');
+
+            // remove commas and split into arrays
+            if(this.movielist !== null){
+                let movies = this.movielist.split(',').filter(i => i)
+                movies.includes(this.id) ? this.isAdded = true : this.isAdded = false;
+            }
+        },
+        addToFav: function(){
+            this.isAdded = true;
+            this.favMovies = [this.movielist, this.id];
+            localStorage.setItem('favmovielist', this.favMovies)
+        },
+        removeFromFav: function(){
+            this.isAdded = false;
+            // remove commas and split into arrays
+            let movies = this.movielist.split(',').filter(i => i);
+            movies = movies.filter(i => {
+               return i != this.id
+            })
+            localStorage.setItem('favmovielist', movies)
         }
     },
     created(){
         this.getDetails();
         this.getCredits();
         this.getTrailer();
+        this.getFavList();
     },
     computed:{
         runtime: function(){
@@ -205,6 +243,39 @@ export default {
 .moviedetails-video i{
     color: #FFF;
     margin: 1rem 0;
+}
+.addtofav-btn{
+    background-color: #857d7d;
+    border: none;
+    /* max-height: 3rem; */
+    padding: 1%;
+    color: #00c4ff;
+    cursor: pointer;
+    margin: 1rem;
+    border-radius: 50px;
+}
+.addtofav-btn:hover{
+    color: #fff;
+    transition: 0.5s ease;
+}
+
+.addedtofav-btn{
+    background-color: #857d7d;
+    border: none;
+    padding: 1%;
+    color: #F71700;
+    cursor: pointer;
+    margin: 1rem;
+    border-radius: 50px;
+}
+.addedtofav-btn > .only-hover{
+    display: none;
+}
+.addedtofav-btn:hover > .only-hover{
+    display: inline;
+}
+.addedtofav-btn:hover > .non-hover{
+    display: none;
 }
 @media (min-width:500px){
     .moviedetails-poster{

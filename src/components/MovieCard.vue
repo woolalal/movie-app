@@ -1,5 +1,5 @@
 <template>
-    <div v-if="nowPlaying" class="movie-grid">
+    <div v-if="nowPlaying?.length > 0" class="movie-grid">
         <div v-for="(movie, index) in nowPlaying" :key="movie.id">
             <div v-if="index < 10" class="moviecard-container">
                 <img :src="'https://image.tmdb.org/t/p/w500/' + movie.poster_path" class="movie-poster">
@@ -17,6 +17,10 @@
             </div>
         </div>
     </div>
+    <div v-else-if="displayOption == 'Favourites' && nowPlaying.length == 0" class="nomovies-added">
+        <p>Looking abit empty here...</p>
+        <p>Add a movie to your favourites to see them listed here!</p>
+    </div>
     <div v-else>
         <img src="../assets/spinner.gif" class="loading-spinner">
     </div>
@@ -27,6 +31,7 @@ export default {
     name: 'MovieCard',
     props:{
         nowPlaying: Array,
+        displayOption: String,
     },
 }
 </script>
@@ -96,6 +101,17 @@ export default {
         color: #ff983d;
         background: none;
         cursor: pointer;
+    }
+    .nomovies-added{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+    }
+    .nomovies-added p{
+        margin: 0.5rem 0;
+        font-weight: bold;
     }
     @media (min-width: 1024px) and (max-width: 1400px){
         .movie-grid{

@@ -16,9 +16,10 @@
         <option value="Top Rated">Top Rated</option>
         <option value="Upcoming">Upcoming</option>
         <option value="Popular">Popular</option>
+        <option value="Favourites">Favourites</option>
       </select>
     </div>
-    <MovieCard :nowPlaying="nowPlaying" />
+    <MovieCard :nowPlaying="nowPlaying" :displayOption="displayOption" />
   </div>
 </template>
 
@@ -35,8 +36,6 @@ export default {
   created(){
     var getOption = localStorage.getItem('option');
     getOption === null ? this.displayOption === "Top Rated" : this.displayOption = getOption;
-    //this.displayOption = getOption;
-    // this.getNowPlaying();
     this.filterDisplay();
   },
   data(){
@@ -44,6 +43,8 @@ export default {
       nowPlaying: null,
       apiKey: '85a89bafcb43e3738d8f6a5af6e90def',
       displayOption: 'Now Playing',
+      favMovieList: null,
+      favMovieListData: null,
     }
   },
   methods:{
@@ -51,7 +52,7 @@ export default {
       axios.get(`https://api.themoviedb.org/3/movie/now_playing?api_key=${this.apiKey}&language=en-US&page=1`)
       .then(res => {
         this.nowPlaying = res.data.results;
-        console.log(this.nowPlaying);
+        // console.log(this.nowPlaying);
       })
       .catch(error => {
         console.log(error);
@@ -72,6 +73,8 @@ export default {
           case 'Popular':
             this.getPopular();
             break;
+          case 'Favourites':
+            this.getFavourites();
           default:
             this.getNowPlaying();
             break;
@@ -92,7 +95,6 @@ export default {
     getUpcoming: function(){
       axios.get(`https://api.themoviedb.org/3/movie/upcoming?api_key=${this.apiKey}&language=en-US&page=2`)
       .then(res => {
-        console.log(res.data);
         this.nowPlaying = res.data.results;
       })
       .catch(error => {
@@ -102,12 +104,41 @@ export default {
     getPopular: function(){
       axios.get(`https://api.themoviedb.org/3/movie/popular?api_key=${this.apiKey}&language=en-US&page=1`)
       .then(res => {
-        console.log(res.data);
         this.nowPlaying = res.data.results;
       })
       .catch(error => {
         console.log(error);
       })
+    },
+    getFavourites: function(){
+      // get movie list
+      let movielist = localStorage.getItem('favmovielist');
+
+      if(movielist !== null){
+        // remove commas and split into arrays
+        movielist = movielist?.split(',').filter(i => i)
+        // remove duplicates from array
+        this.favMovieList = [...new Set(movielist)]
+        const fetchPost = async (movie) => {
+          try {
+            const data = await axios.get(`https://api.themoviedb.org/3/movie/${movie}?api_key=${this.apiKey}&language=en-US`)
+            return data?.data;
+          }
+          catch(err){
+            console.log(err);
+          }
+        }
+        // initialize array to contain movie data
+        let list = [];
+        this.favMovieList.forEach(async (movie) => {
+          const post = await fetchPost(movie);
+          list.push(post);
+        })
+        setTimeout(() => {
+          this.nowPlaying = list;
+        }, 100)
+      }
+      else this.nowPlaying = null;
     },
     searchMovie: function(e){
       e.preventDefault();

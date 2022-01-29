@@ -57,15 +57,13 @@ export default {
         getDetails: function(){
             axios.get(`https://api.themoviedb.org/3/person/${this.id}?api_key=${this.apiKey}&language=en-US`)
             .then(res => {
-                this.actorDetails = res.data;
-                console.log(this.actorDetails);
+                this.actorDetails = res.data;            
             })
         },
         getCredits: function(){
             axios.get(`https://api.themoviedb.org/3/person/${this.id}/movie_credits?api_key=${this.apiKey}&language=en-US`)
             .then(res => {
-                this.actorCredits = res.data;
-                console.log(res.data);
+                this.actorCredits = res.data;            
             })
         }
     }
